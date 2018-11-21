@@ -60,6 +60,10 @@ class ReactSelect(object):
         raise NoSuchElementException("Could not locate element with index %d" % index)
 
     def deselect_all(self):
+
+        if not self.is_multiple and len(self.select_menu.find_elements_by_class_name('Select-clear')) == 0:
+            raise Exception("There is no deselect all button")
+
         self.select_menu.find_element_by_class_name('Select-clear').click()
 
     # todo:implement selection by partial text
