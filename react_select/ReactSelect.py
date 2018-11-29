@@ -28,7 +28,11 @@ class ReactSelect(object):
 
     @property
     def options(self):
-        return self.menu.find_elements_by_xpath("//div[@role='option']")
+        options_locator = "//div[@role='option']"
+        # wait for react menu to load
+        WebDriverWait(self.driver, 10).until(lambda _: len(self.menu.find_elements_by_xpath(options_locator)) > 0)
+
+        return self.menu.find_elements_by_xpath(options_locator)
 
     @property
     def all_selected_options(self):
@@ -108,8 +112,7 @@ class ReactSelect(object):
         if self._is_menu_open():
             return
 
-        ActionChains(self.driver).move_to_element(
-            self.select_menu.find_element_by_class_name('Select-arrow')).click().perform()
+        self._click_select_arrow_button()
 
         self.wait.until(lambda _: self.driver.find_element_by_class_name(self.select_menu_locator))
 
@@ -125,7 +128,11 @@ class ReactSelect(object):
 
     def _close_menu(self):
         if self._is_menu_open():
-            self.driver.send_keys(Keys.ESCAPE)
+            self._click_select_arrow_button()
 
     def _unsetSelected(self, selected_option):
         selected_option.find_element_by_class_name('Select-value-icon').click()
+
+    def _click_select_arrow_button(self):
+        ActionChains(self.driver).move_to_element(
+            self.select_menu.find_element_by_class_name('Select-arrow')).click().perform()

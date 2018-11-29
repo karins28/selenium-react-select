@@ -1,0 +1,9 @@
+README.md
+setup.py
+example_pkg.egg-info/PKG-INFO
+example_pkg.egg-info/SOURCES.txt
+example_pkg.egg-info/dependency_links.txt
+example_pkg.egg-info/requires.txt
+example_pkg.egg-info/top_level.txt
+react_select/ReactSelect.py
+react_select/__init__.py
