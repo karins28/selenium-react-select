@@ -5,17 +5,52 @@ from selenium.webdriver.common.keys import Keys
 
 
 class ReactSelect(object):
-    select_menu_locator = "Select-menu"
 
-    def __init__(self, web_element):
-        if 'Select' not in web_element.get_attribute('class'):
-            raise Exception('This element is Not a ReactSelect')
+    def react_select_1(self):
+        self.select_menu_locator = "Select-menu"
+        self.select_control = "Select-control"
+        self.is_multi = "Select--multi"
+        self.select_value = "Select-value"
+        self.options_locator = "//div[@role='option']"
+        self.select_clear = "Select-clear"
+        self.select_value_icon = "Select-value-icon"
+        self.select_arrow = "Select-arrow"
+        self.select_value_label = 'Select-value-label'
+
+    def react_select_2(self, prefix):
+        self.select_menu_locator = "select__menu"
+        self.select_value = 'select__multi-value'
+        self.select_single_value = 'select__single-value'
+        self.select_control = ReactSelect.add_prefix("select__control", prefix)
+        self.is_multi = ReactSelect.add_prefix("select__value-container--is-multi", prefix)
+        self.options_locator = "//div[@role='option']"
+        self.select_clear = ReactSelect.add_prefix("select__clear-indicator", prefix)
+        self.select_value_icon = ReactSelect.add_prefix("select__multi-value__remove", prefix)
+        self.select_arrow = ReactSelect.add_prefix("select__dropdown-indicator", prefix)
+        self.select_value_label = ReactSelect.add_prefix("select__multi-value__label", prefix)
+
+    @staticmethod
+    def add_prefix(value, prefix):
+        return prefix + value
+
+    def __init__(self, web_element, version=2, prefix=""):
+        self.version = version
+        if version == 1:
+            ReactSelect.react_select_1(self)
+
+        else:
+            ReactSelect.react_select_2(self, prefix)
 
         self.driver = web_element.parent
         self.select_menu = web_element
+
+        if not (self.select_control in web_element.get_attribute(
+                'class') or len(web_element.find_elements_by_class_name(self.select_control)) > 0):
+            raise Exception('This element is Not a ReactSelect')
+
         self.wait = WebDriverWait(self.driver, 5)
 
-        self.is_multiple = 'Select--multi' in web_element.get_attribute('class')
+        self.is_multiple = len(self.select_menu.find_elements_by_class_name(self.is_multi)) > 0
 
     @property
     def menu(self):
@@ -24,15 +59,18 @@ class ReactSelect(object):
 
     @property
     def selected_options_on_line(self):
-        return self.select_menu.find_elements_by_class_name('Select-value')
+        if self.version == 2 and self.is_multi is False:
+            return self.select_menu.find_elements_by_class_name(self.select_single_value)
+
+        return self.select_menu.find_elements_by_class_name(self.select_value)
 
     @property
     def options(self):
-        options_locator = "//div[@role='option']"
         # wait for react menu to load
-        WebDriverWait(self.driver, 10).until(lambda _: len(self.menu.find_elements_by_xpath(options_locator)) > 0)
+        WebDriverWait(self.driver, 10).until(
+            lambda _: len(self.menu.find_elements_by_xpath(self.options_locator)) > 0)
 
-        return self.menu.find_elements_by_xpath(options_locator)
+        return self.menu.find_elements_by_xpath(self.options_locator)
 
     @property
     def all_selected_options(self):
@@ -65,10 +103,11 @@ class ReactSelect(object):
 
     def deselect_all(self):
 
-        if not self.is_multiple and len(self.select_menu.find_elements_by_class_name('Select-clear')) == 0:
+        if not self.is_multiple and len(
+                self.select_menu.find_elements_by_class_name(self.select_clear)) == 0:
             raise Exception("There is no deselect all button")
 
-        self.select_menu.find_element_by_class_name('Select-clear').click()
+        self.select_menu.find_element_by_class_name(self.select_clear).click()
 
     # todo:implement selection by partial text
     def select_by_visible_text(self, text):
@@ -101,7 +140,7 @@ class ReactSelect(object):
         selected = False
 
         for opt in self.selected_options_on_line:
-            if opt.find_element_by_class_name('Select-value-label').text.strip() == text.strip():
+            if opt.find_element_by_class_name(self.select_value_label).text.strip() == text.strip():
                 self._unsetSelected(opt)
                 selected = True
 
@@ -124,15 +163,16 @@ class ReactSelect(object):
             option.click()
 
     def _is_menu_open(self):
-        return 'is-open' in self.select_menu.get_attribute('class')
+        return len(self.select_menu.find_elements_by_class_name(self.select_menu_locator)) > 0
+        # return 'is-open' in self.select_menu.get_attribute('class')
 
     def _close_menu(self):
         if self._is_menu_open():
             self._click_select_arrow_button()
 
     def _unsetSelected(self, selected_option):
-        selected_option.find_element_by_class_name('Select-value-icon').click()
+        selected_option.find_element_by_class_name(self.select_value_icon).click()
 
     def _click_select_arrow_button(self):
         ActionChains(self.driver).move_to_element(
-            self.select_menu.find_element_by_class_name('Select-arrow')).click().perform()
+            self.select_menu.find_element_by_class_name(self.select_arrow)).click().perform()
