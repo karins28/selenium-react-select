@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: selenium-react-select
+Version: 0.0.3
+Summary: package for react select : version 1 and 2
+Home-page: https://github.com/karins28/selenium-react-select
+Author: Karin Shaim
+Author-email: karins1010@gmail.com
+License: UNKNOWN
+Description: # react-select-selenium
+        a library for react select selenium actions
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 2.7
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown

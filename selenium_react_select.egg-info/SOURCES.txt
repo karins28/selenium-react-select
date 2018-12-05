@@ -1,0 +1,9 @@
+README.md
+setup.py
+react_select/ReactSelect.py
+react_select/__init__.py
+selenium_react_select.egg-info/PKG-INFO
+selenium_react_select.egg-info/SOURCES.txt
+selenium_react_select.egg-info/dependency_links.txt
+selenium_react_select.egg-info/requires.txt
+selenium_react_select.egg-info/top_level.txt
