@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="selenium-react-select",
-    version="0.0.2",
+    version="0.0.3",
     author="Karin Shaim",
     author_email="karins1010@gmail.com",
-    description="package for react select",
+    description="package for react select : version 1 and 2",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/karins28/selenium-react-select",
