@@ -18,11 +18,11 @@ class ReactSelect(object):
         self.select_value_label = 'Select-value-label'
 
     def react_select_2(self, prefix):
-        self.select_menu_locator = "select__menu"
-        self.select_value = 'select__multi-value'
-        self.select_single_value = 'select__single-value'
+        self.select_menu_locator = ReactSelect.add_prefix("select__menu", prefix)
+        self.select_value = ReactSelect.add_prefix('select__multi-value', prefix)
+        self.select_single_value = ReactSelect.add_prefix('select__single-value', prefix)
         self.select_control = ReactSelect.add_prefix("select__control", prefix)
-        self.is_multi = ReactSelect.add_prefix("select__value-container--is-multi", prefix)
+        self.select_value_container = ReactSelect.add_prefix("select__value-container", prefix)
         self.options_locator = "//div[@role='option']"
         self.select_clear = ReactSelect.add_prefix("select__clear-indicator", prefix)
         self.select_value_icon = ReactSelect.add_prefix("select__multi-value__remove", prefix)
@@ -34,23 +34,19 @@ class ReactSelect(object):
         return prefix + value
 
     def __init__(self, web_element, version=2, prefix=""):
+        self.driver = web_element.parent
+        self.select_menu = web_element
+        self.wait = WebDriverWait(self.driver, 5)
+
         self.version = version
         if version == 1:
             ReactSelect.react_select_1(self)
+            self.is_multiple = 'Select--multi' in self.select_menu.get_attribute('class')
 
         else:
             ReactSelect.react_select_2(self, prefix)
-
-        self.driver = web_element.parent
-        self.select_menu = web_element
-
-        if not (self.select_control in web_element.get_attribute(
-                'class') or len(web_element.find_elements_by_class_name(self.select_control)) > 0):
-            raise Exception('This element is Not a ReactSelect')
-
-        self.wait = WebDriverWait(self.driver, 5)
-
-        self.is_multiple = len(self.select_menu.find_elements_by_class_name(self.is_multi)) > 0
+            self.is_multiple = 'select__value-container--is-multi' in self.select_menu.find_element_by_class_name(
+                self.select_value_container).get_attribute('class')
 
     @property
     def menu(self):
@@ -59,7 +55,7 @@ class ReactSelect(object):
 
     @property
     def selected_options_on_line(self):
-        if self.version == 2 and self.is_multi is False:
+        if self.version == 2 and self.is_multiple is False:
             return self.select_menu.find_elements_by_class_name(self.select_single_value)
 
         return self.select_menu.find_elements_by_class_name(self.select_value)
@@ -67,9 +63,10 @@ class ReactSelect(object):
     @property
     def options(self):
         # wait for react menu to load
+        '''
         WebDriverWait(self.driver, 10).until(
             lambda _: len(self.menu.find_elements_by_xpath(self.options_locator)) > 0)
-
+        '''
         return self.menu.find_elements_by_xpath(self.options_locator)
 
     @property
@@ -163,8 +160,14 @@ class ReactSelect(object):
             option.click()
 
     def _is_menu_open(self):
-        return len(self.select_menu.find_elements_by_class_name(self.select_menu_locator)) > 0
-        # return 'is-open' in self.select_menu.get_attribute('class')
+        children = self.select_menu.find_elements_by_css_selector("*")
+        for child in children:
+            child_classy = child.get_attribute('class')
+            child_classy = "" if child_classy is None else child_classy
+            if self.select_menu_locator in child_classy:
+                return True
+
+        return False
 
     def _close_menu(self):
         if self._is_menu_open():
